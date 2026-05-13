@@ -1,13 +1,221 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Random Signals</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #00ff9f;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        h1 {color: #00ffcc; text-shadow: 0 0 20px #00ffcc;}
 
+        .side-anim {position: absolute; font-size: 32px; opacity: 0.25; animation: floatSide 14s infinite linear; pointer-events: none;}
+        .left {left: 15px;} .right {right: 15px;}
+        @keyframes floatSide {0% {transform: translateY(0);} 50% {transform: translateY(-120px);} 100% {transform: translateY(0);}}
+
+        .container {max-width: 720px; margin: 0 auto; background: rgba(0,0,0,0.85); padding: 30px; border-radius: 20px; box-shadow: 0 0 30px rgba(0,255,150,0.3); position: relative;}
+
+        .big-btn {
+            background: linear-gradient(145deg, #ff00aa, #cc0088);
+            color: white;
+            border: none;
+            padding: 20px 45px;
+            font-size: 26px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 25px 0;
+            box-shadow: 0 8px 25px rgba(255, 0, 170, 0.5);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .big-btn:hover {transform: translateY(-5px); box-shadow: 0 15px 35px rgba(255, 0, 170, 0.7);}
+        .big-btn:active {transform: scale(0.9);}
+
+        .result {margin: 25px 0; font-size: 26px; min-height: 380px; padding: 25px; background: rgba(255,255,255,0.05); border-radius: 15px; border: 3px solid #00ffcc; position: relative;}
+        .result.high-leverage {border-color: #ff0033; box-shadow: 0 0 30px #ff0033; animation: pulse 1.2s infinite;}
+        @keyframes pulse {0% {box-shadow: 0 0 25px #ff0033;} 50% {box-shadow: 0 0 45px #ff6600;} 100% {box-shadow: 0 0 25px #ff0033;}}
+        
+        .badge {position: absolute; top: 18px; right: 18px; padding: 4px 12px; border-radius: 30px; font-weight: bold; font-size: 15px; box-shadow: 0 0 12px currentColor;}
+        .light {background: #00ff88; color: #000;}
+        .hot {background: #ff8800; color: #000;}
+        .danger {background: #ff0000; color: white; animation: dangerBlink 0.7s infinite;}
+        @keyframes dangerBlink {0%,100% {opacity: 1;} 50% {opacity: 0.35;}}
+        
+        .live-prices {margin: 30px 0; background: rgba(0,0,0,0.6); padding: 12px; border-radius: 15px; border: 2px solid #00ccff; max-height: 320px; overflow-y: auto;}
+        
+        table {width: 100%; border-collapse: collapse;}
+        th, td {padding: 6px 10px; text-align: left; border-bottom: 1px solid rgba(0,255,200,0.2);}
+        th {color: #00ccff;}
+        
+        /* УМЕНЬШЕННЫЕ ИКОНКИ */
+        .logo {
+            width: 22px;
+            height: 22px;
+            vertical-align: middle;
+            margin-right: 8px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="side-anim left" style="top:25%;">🚀</div>
+        <div class="side-anim left" style="top:45%; animation-delay:3s;">🌕</div>
+        <div class="side-anim left" style="top:65%; animation-delay:6s;">💎</div>
+       
+        <div class="side-anim right" style="top:30%; animation-delay:2s;">🚀</div>
+        <div class="side-anim right" style="top:55%; animation-delay:5s;">🌕</div>
+        <div class="side-anim right" style="top:75%; animation-delay:8s;">💰</div>
+
+        <h1>Crypto Random Signals</h1>
+        <p><strong>Твой личный генератор космической удачи ✨</strong></p>
+
+        <div class="live-prices">
+            <h3 style="margin:5px 0 12px; color:#00ccff;">📡 LIVE ЦЕНЫ ТОП-77</h3>
+            <table id="prices-table">
+                <thead><tr><th>Монета</th><th>Цена USD</th><th>24ч %</th></tr></thead>
+                <tbody id="prices-body"></tbody>
+            </table>
+            <button onclick="loadPrices()" style="font-size:13px; padding:6px 16px; margin-top:8px;">🔄 Обновить цены</button>
+        </div>
+
+        <div id="result" class="result">
+            Нажми кнопку и пусть космос решит за тебя 😂
+        </div>
+
+        <button onclick="generateSignal()" class="big-btn" id="randomBtn">
+            🎲 Ну что, рискнём по-крупному?
+        </button>
+
+        <div class="disclaimer">
+            <strong>ДИСКЛЕЙМЕР:</strong><br>
+            Это чисто развлекательное приложение. Автор не несёт никакой ответственности за твои потери, 
+            бессонные ночи и внезапное желание продать почку.
+        </div>
+    </div>
+
+    <script>
+        const buttonPhrases = [
+            "🎲 Ну что, рискнём по-крупному?",
+            "🎲 Давай, космос, не подведи!",
+            "🎲 Рандомизни мою жизнь!",
+            "🎲 А ну, удиви меня, сукин сын!",
+            "🎲 Крути рулетку, космос!",
+            "🎲 Жги, я в деле! 🚀",
+            "🎲 Давай устроим хаос!",
+            "🎲 Кидай, я готов к приключениям!"
+        ];
+
+        const coins = ["BTC","ETH","XRP","BNB","SOL","DOGE","TRX","TON","ADA","AVAX","SHIB","LINK","SUI","LEO","XLM","DOT","HBAR","BCH","LTC","UNI","NEAR","APT","PEPE","KAS","POL","ICP","ETC","XMR","FET","RENDER","OKB","ARB","STX","FIL","CRO","TAO","MNT","INJ","IMX","WIF","FTM","RUNE","BONK","FLOKI","VET","GRT","AAVE","OP","MKR","THETA","AR","ONDO","ALGO","HYPE","JUP","SEI","TIA","LDO","FLOW","QNT","BEAM","NOT","CORE","EOS","AXS","DYDX","GALA","STRK","WLD","ENA","NEO","BTT","SAND","MANA","PENDLE","AKT","XTZ"];
+
+        let priceData = {};
+
+        async function loadPrices() {
+            const tbody = document.getElementById('prices-body');
+            tbody.innerHTML = '<tr><td colspan="3">🔄 Загружаем цены...</td></tr>';
+
+            try {
+                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&price_change_percentage=24h');
+                const data = await res.json();
+
+                priceData = {};
+                data.forEach(coin => {
+                    const symbol = coin.symbol.toUpperCase();
+                    if (coins.includes(symbol)) {
+                        priceData[symbol] = {
+                            price: coin.current_price,
+                            change24h: coin.price_change_percentage_24h || 0,
+                            logo: coin.image
+                        };
+                    }
+                });
+                renderPricesTable();
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="3" style="color:#ffaa00;">Не удалось загрузить цены</td></tr>';
+            }
+        }
+
+        function renderPricesTable() {
+            const tbody = document.getElementById('prices-body');
+            tbody.innerHTML = '';
+            coins.forEach(symbol => {
+                const c = priceData[symbol] || {price: 65000, change24h: 0, logo: ''};
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <img src="${c.logo}" class="logo" onerror="this.src='https://via.placeholder.com/22/333/fff?text=${symbol}'">
+                        ${symbol}
+                    </td>
+                    <td>$${c.price.toLocaleString('ru-RU')}</td>
+                    <td class="${c.change24h >= 0 ? 'green' : 'red'}">
+                        ${c.change24h >= 0 ? '+' : ''}${c.change24h.toFixed(2)}%
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function generateSignal() {
+            const btn = document.getElementById('randomBtn');
+            btn.textContent = getRandom(buttonPhrases);
+
+            const symbol = getRandom(coins);
+            const direction = Math.random() > 0.5 ? "Long" : "Short";
+            const lev = [20,25,30,40,50,60,75,100,125][Math.floor(Math.random()*9)];
+            
+            const coinInfo = priceData[symbol] || {price: 65000, logo: ''};
+            const entryPrice = coinInfo.price;
+
+            let baseRisk = 7 + Math.random() * 11;
+            if (lev >= 100) baseRisk = Math.max(5, baseRisk * 0.75);
+            let rr = 3.5 + Math.random() * 4.5;
+
+            const slPct = direction === "Long" ? -baseRisk : baseRisk;
+            const tpPct = direction === "Long" ? baseRisk * rr : -baseRisk * rr;
+
+            const decimals = entryPrice >= 1 ? 4 : 8;
+            const slPrice = (entryPrice * (1 + slPct/100)).toFixed(decimals);
+            const tpPrice = (entryPrice * (1 + tpPct/100)).toFixed(decimals);
+
+            const resultDiv = document.getElementById("result");
+
+            let badge = lev >= 90 ? `<div class="badge danger">DANGER x${lev}</div>` :
+                       lev >= 40 ? `<div class="badge hot">HOT x${lev}</div>` :
+                       `<div class="badge light">LIGHT x${lev}</div>`;
+
+            let phrase = rr >= 7 ? "ДЕРЖИ ДО ЛУНЫ, КОСМОНАВТ!!! 🚀" :
+                         rr >= 5.5 ? "Это может быть очень жирно 🔥" : "Хороший шанс посидеть подольше";
+
+            resultDiv.innerHTML = `
+                ${badge}
+                <div style="display:flex; align-items:center; justify-content:center; gap:15px;">
+                    <img src="${coinInfo.logo}" width="52" height="52" style="border-radius:50%; border:2px solid #00ffcc;" onerror="this.src='https://via.placeholder.com/52/333/fff?text=${symbol}'">
+                    <div>
+                        <strong style="color:#ff00ff; font-size:36px;">${symbol} ${direction} ×${lev}</strong><br>
+                        <span class="price-line">Цена: <strong>$${entryPrice.toLocaleString('ru-RU')}</strong></span>
+                    </div>
+                </div>
+                <br>
+                <div class="price-line"><strong>Stop Loss:</strong> ${slPct.toFixed(1)}% <span style="color:#ff3366;">($${slPrice})</span></div>
+                <div class="price-line"><strong>Take Profit:</strong> ${tpPct.toFixed(1)}% <span style="color:#00ff88;">($${tpPrice})</span></div>
+                <br>
+                <small style="font-size:17px;">${phrase}<br>Риск-ревард ≈ 1:${rr.toFixed(1)}</small>
+            `;
+        }
+
+        window.onload = loadPrices;
+    </script>
+</body>
+</html>
