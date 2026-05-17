@@ -77,6 +77,52 @@
         table {width: 100%; border-collapse: collapse;}
         th, td {padding: 6px 8px; text-align: left; font-size: 14px;}
         .logo {width: 20px; height: 20px; border-radius: 50%; margin-right: 6px; vertical-align: middle;}
+        .green {color: #00ff88;} .red {color: #ff4444;}
+        
+        /* 💰 БЛОК ПОДДЕРЖКИ */
+        .donation-box {
+            background: rgba(0, 255, 159, 0.05);
+            border: 2px solid rgba(0, 255, 159, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(0, 255, 159, 0.1);
+        }
+        .donation-box h3 {
+            color: #00ff9f;
+            margin: 0 0 15px 0;
+            font-size: 20px;
+        }
+        .donation-box p {
+            color: #aaa;
+            margin: 0 0 12px 0;
+            font-size: 14px;
+        }
+        .btc-address {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 13px;
+            word-break: break-all;
+            color: #00ffcc;
+            margin: 10px 0;
+            border: 1px solid rgba(0, 255, 204, 0.2);
+        }
+        .copy-btn {
+            background: linear-gradient(145deg, #00ff9f, #00cc88);
+            color: #000;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover {transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 255, 159, 0.5);}
+        .copy-btn:active {transform: scale(0.98);}
     </style>
 </head>
 <body>
@@ -101,6 +147,16 @@
                 <tbody id="prices-body"></tbody>
             </table>
         </details>
+
+        <!-- 💰 БЛОК ПОДДЕРЖКИ -->
+        <div class="donation-box">
+            <h3>💖 Поддержи проект</h3>
+            <p>Если приложение приносит тебе радость — можешь поддержать разработчика!</p>
+            <p style="color:#ffcc00; font-size:13px;">📍 Bitcoin (BTC) сеть:</p>
+            <div class="btc-address" id="btc-address">bc1qzuxp2zk0mveekdf0enxkllxr6m998tpffv43cs</div>
+            <button class="copy-btn" onclick="copyBTC()">📋 Скопировать адрес</button>
+            <p style="color:#888; font-size:12px; margin-top:10px;">* После копирования адрес будет в буфере обмена</p>
+        </div>
 
         <div style="text-align:center; margin-top:50px; font-size:14px; color:#aaa; line-height:1.6;">
             <strong>ДИСКЛЕЙМЕР:</strong><br>
@@ -207,6 +263,21 @@
                 <br>
                 <small style="font-size:17px;">${phrase}<br>Риск-ревард ≈ 1:${rr.toFixed(1)}</small>
             `;
+        }
+
+        function copyBTC() {
+            const address = document.getElementById('btc-address').textContent;
+            navigator.clipboard.writeText(address).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '✅ Скопировано!';
+                btn.style.background = 'linear-gradient(145deg, #00ff88, #00cc66)';
+                setTimeout(() => {
+                    btn.textContent = '📋 Скопировать адрес';
+                    btn.style.background = 'linear-gradient(145deg, #00ff9f, #00cc88)';
+                }, 2000);
+            }).catch(err => {
+                alert('Не удалось скопировать: ' + err);
+            });
         }
 
         window.onload = loadPrices;
